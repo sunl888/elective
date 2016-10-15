@@ -1,4 +1,4 @@
-#<font color=#00ffff >课程设计选课系统</font>
+#<font color=#f00 >课程设计选课系统</font>
 
 ----------
 
