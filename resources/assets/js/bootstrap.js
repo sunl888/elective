@@ -29,7 +29,7 @@ Vue.http.interceptors.push((request, next) => {
     request.headers.set('X-CSRF-TOKEN', Laravel.csrfToken);
 
     next();
-});
+})
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening

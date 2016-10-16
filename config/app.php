@@ -173,6 +173,7 @@ return [
         Ty666\Login2hnnuJwc\Laravel\LaravelServiceProvider::class,
         Prettus\Repository\Providers\RepositoryServiceProvider::class,
         MetricLoop\TransformerMaker\TransformerMakerServiceProvider::class,
+        Barryvdh\Cors\ServiceProvider::class,//跨域请求
 
         /*
          * Application Service Providers...

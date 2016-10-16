@@ -8,7 +8,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use Dingo\Api\Exception\StoreResourceFailedException;
 use Illuminate\Http\Request;
+use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Ty666\Login2hnnuJwc\Facades\Login2hnnuJwc;
@@ -22,7 +24,7 @@ class AuthenticateController extends BaseApiController
      */
     protected $validationRules=[
         'number' => ['required' , 'regex:/^\d{10}$/'],
-        'password' => ['required' , 'regex:/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/'],
+        'password' => ['required' , 'regex:/^\d{17}[\d|X|x]$/'],
     ];
     protected $guard = 'user';
 
@@ -33,25 +35,29 @@ class AuthenticateController extends BaseApiController
          */
         $validator = Validator::make($request->input() , $this->validationRules);
         if($validator->fails()){
-            throw new \Dingo\Api\Exception\StoreResourceFailedException('登陆失败!', $validator->errors());
+            throw new InvalidParameterException($validator->errors()->first());
         }
-        $input = $request->only('number' , 'password');
-
-        if (!($token = JWTAuth::attempt($input))) {
-            try {
-                Login2hnnuJwc::login2Jwc($input['number'], $input['password']);
-                $userInfo = Login2hnnuJwc::getStudentInfoFromJWC();
-                //把用户信息添加到users表
-                $userInfo = User::create([
-                    'number'=> $input['number'],
-                    'password'=> $input['password'],
-                    'name'=> $userInfo['student_name'],
-                    'class'=> $userInfo['student_class'],
-                ]);
-                $token = JWTAuth::fromUser($userInfo);
-            } catch (LoginJWCException $e) {
-                dd($e->getMessage());
+        $input = $request->all();
+        $login = User::where(['number'=>$input['number'],'password'=>$input['password']])->first();
+        if(!$login) {
+            //本地数据库不存在
+            if (!$token = JWTAuth::attempt($input)) {
+                try {
+                    Login2hnnuJwc::login2Jwc($input['number'], $input['password']);
+                    $userInfo = Login2hnnuJwc::getStudentInfoFromJWC();
+                    $userInfo = User::create([
+                        'number' => $input['number'],
+                        'password' => $input['password'],
+                        'name' => $userInfo['student_name'],
+                        'class' => $userInfo['student_class'],
+                    ]);
+                    $token = JWTAuth::fromUser($userInfo);
+                } catch (LoginJWCException $e) {
+                    throw new StoreResourceFailedException($e->getMessage());
+                }
             }
+        }else{
+            $token = JWTAuth::fromUser($login);
         }
         return ['token' => $token];
     }

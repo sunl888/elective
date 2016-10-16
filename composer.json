@@ -13,7 +13,8 @@
 
         "ty666/login2hnnu-jwc": "^1.0",
         "prettus/l5-repository": "^2.6",
-        "metricloop/laravel-transformer-maker": "^1.0"
+        "metricloop/laravel-transformer-maker": "^1.0",
+        "barryvdh/laravel-cors": "^0.8.2"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

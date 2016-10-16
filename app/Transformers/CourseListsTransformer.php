@@ -30,14 +30,15 @@ class CourseListsTransformer extends TransformerAbstract
      */
     public function transform(Course $course)
     {
-        //dd($course);
         return [
             'id' => $course->id,
             'course_name' => $course->course_name,
             'belong_class' => $course->belong_class,
             'status' => $course->status,
             'introduce' => $course->introduce,
-            'chooser' => $course->chooser
+            'chooser' => $course->chooser,
+            'custom'=> $course->costom,//判断是不是自定义的课程设计
+            'course_id'=> $course->course_id,//用来修改课程设计内容
         ];
     }
 }

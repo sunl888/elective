@@ -8,7 +8,20 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
+/*
+    ttl：token有效期（分钟）
+    refresh_ttl：刷新token时间（分钟）
+    algo：token签名算法
+    user：指向User模型的命名空间路径
+    identifier：用于从token的sub中获取用户
+    require_claims：必须出现在token的payload中的选项，否则会抛出TokenInvalidException异常
+    blacklist_enabled：如果该选项被设置为false，那么我们将不能废止token，即使我们刷新了token，前一个token仍然有效
+    providers：完成各种任务的具体实现，如果需要的话你可以重写他们
+    User —— providers.user：基于sub获取用户的实现
+    JWT —— providers.jwt：加密/解密token
+    Authentication —— providers.auth：通过证书/ID获取认证用户
+    Storage —— providers.storage：存储token直到它们失效
+ */
 return [
 
     /*
@@ -100,7 +113,7 @@ return [
     |
     */
 
-    'ttl' => env('JWT_TTL', 60),
+    'ttl' => env('JWT_TTL', 20160),
 
     /*
     |--------------------------------------------------------------------------
