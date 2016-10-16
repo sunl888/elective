@@ -174,7 +174,7 @@ return [
         Prettus\Repository\Providers\RepositoryServiceProvider::class,
         MetricLoop\TransformerMaker\TransformerMakerServiceProvider::class,
         Barryvdh\Cors\ServiceProvider::class,//跨域请求
-
+        Clockwork\Support\Laravel\ClockworkServiceProvider::class,
         /*
          * Application Service Providers...
          */

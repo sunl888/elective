@@ -28,13 +28,15 @@ $api->group(['middleware' => 'jwt.auth'], function ($api) {
 
     //通过id返回课程设计详情
     $api->put('course_detail/{id}', 'CourseController@courseDetail');
-
     //通过id选择题目
     $api->put('select_course/{id}', 'CourseController@selectCourse');
 
     //[班长]添加课程设计
     $api->post('add_course', 'CourseController@addCourse');
+
     //学生自定义课程设计
     $api->post('add_custom', 'CustomCourseController@addCustomCourse');
+    //修改自定义课程设计
+    $api->post('upCourse', 'CustomCourseController@upCourse');
 
 });
