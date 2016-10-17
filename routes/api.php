@@ -34,9 +34,13 @@ $api->group(['middleware' => 'jwt.auth'], function ($api) {
     //[班长]添加课程设计
     $api->post('add_course', 'CourseController@addCourse');
 
-    //学生自定义课程设计
+    //取消选择
+    $api->put('cancel_course/{id}', 'CourseController@cancelCourse');
+
+    //自定义课程设计 input: course_name , introduce
     $api->post('add_custom', 'CustomCourseController@addCustomCourse');
-    //修改自定义课程设计
-    $api->post('upCourse', 'CustomCourseController@upCourse');
+
+    //修改自定义的课程设计 input: course_id , course_name , introduce
+    $api->post('up_course', 'CustomCourseController@upCourse');
 
 });

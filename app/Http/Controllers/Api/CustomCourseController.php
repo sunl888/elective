@@ -7,9 +7,7 @@ use App\Models\User;
 use App\Transformers\CourseListsTransformer;
 use Dingo\Api\Exception\StoreResourceFailedException;
 use Illuminate\Http\Request;
-
 use App\Http\Requests;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -23,6 +21,8 @@ class CustomCourseController extends BaseApiController
     /**
      * 修改自定义的课程设计
      * input: course_id , course_name , introduce
+     * 1.只有自己定义的题目才可以修改
+     * return reource | array[] | exception
      */
     public function upCourse(Request $request)
     {
@@ -33,21 +33,27 @@ class CustomCourseController extends BaseApiController
         }
         $course = Course::where([
             'id'=>$custom['course_id'],
-            'custom'=>1//判断此题是不是用户自定义的题目,只有自定义的题目才可以修改
-        ])->update([
-            'course_name'=> $custom['course_name'],
-            'introduce'=> $custom['introduce'],
-        ]);
-        dd($course);
-        return $this->reponse();
+            'is_custom'=>1//判断此题是不是用户自定义的题目,只有自定义的题目才可以修改
+        ])->first();
+        $course->course_name = $custom['course_name'];
+        $course->introduce = $custom['introduce'];
+        $user = JWTAuth::user();
+        $uInfo = User::find($user->id);
+        $uInfo->selected_course = $course->course_name;
+        if(!$course->save() || !$uInfo->save()){
+            throw new StoreResourceFailedException('修改课程设计失败');
+        }
+        return $this->response->item($course , new CourseListsTransformer());
     }
 
     /**
      * 添加自定义课程设计并且选择该课程设计
      * input: course_name , introduce
+     * 1.当老师提供的课程设计不符合要求或者不够的时候学生可以自己添加喜欢的课程设计
+     * 2.自己添加的课程设计只有自己才可以修改使用is_custom来区分是不是自己定义
      */
     public function addCustomCourse(Request $request){
-        $course = $request->input();
+        $course = $request->all();
         $validator = Validator::make($request->input() , $this->validationRoles);
         if($validator->fails()){
             throw new StoreResourceFailedException('数据验证失败!', $validator->errors());
@@ -64,18 +70,18 @@ class CustomCourseController extends BaseApiController
         if(!$lists->isEmpty()){
             throw new \Dingo\Api\Exception\StoreResourceFailedException('该课程设计已经存在!');
         }
-
-        $addCourse = Course::create([
+        $data = [
             'id'=>null,
             'course_name'=> $request->course_name,
             'belong_class'=> $user->class,
-            'introduce'=>$request->introduce,
-            'status'=>1,
-            'user_id'=>$user->id,
-            'chooser'=>$user->name,
-            'custom'=>1,
-        ]);
-        //dd($addCourse);
+            'introduce'=> $request->introduce,
+            'status'=> 1,
+            'user_id'=> $user->id,
+            'chooser'=> $user->name,
+            'is_custom'=> 1,
+        ];
+        $addCourse = Course::create($data);
+
         $uInfo = User::find($user->id);
         $uInfo->selected_course = $addCourse->course_name;
         $uInfo->save();

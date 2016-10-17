@@ -24,7 +24,7 @@ class CourseController extends BaseApiController
     ];
 
     /**
-     * 返回个人信息
+     * 返回用户的信息以及他选择的课程信息
      */
     public function me()
     {
@@ -33,11 +33,11 @@ class CourseController extends BaseApiController
         $course = Course::where(['user_id'=>$user->id])->first();
         if(is_null($course)){
             $user['introduce'] = '';
-            $user['costom'] = 0;
+            $user['is_costom'] = 0;
             $user['course_id'] = 0;
         }else{
             $user['course_id'] = $course->id;//可通过此id来修改课程设计内容
-            $user['costom'] = $course->costom;//表示该题目是不是自己添加的 默认:0
+            $user['is_costom'] = $course->costom;//表示该题目是不是自己添加的 默认:0
             $user['introduce'] = $course->introduce;//题目的详情
         }
         return $this->response->item($user , new UserTransformer());
@@ -78,7 +78,38 @@ class CourseController extends BaseApiController
         if(!$course->save() || !$uInfo->save()){
             throw new StoreResourceFailedException('选择课程设计失败.');
         }
-        return $this->response->noContent();//选择成功
+        return $this->response()->array(['msg'=>'你已成功选择该课程设计']);//选择成功
+    }
+    /**
+     * 取消选择
+     */
+    public function cancelCourse($id){
+        $user = JWTAuth::user();
+        if($this->isChoosed() == null){
+            throw new StoreResourceFailedException('你还没有选课程设计呢.');
+        }
+        $course = Course::where(['id' => $id , 'user_id' => $user->id])->first();
+
+        if($course == null){
+            throw new StoreResourceFailedException('数据库里没有该课程.');
+        }
+        //判断是不是用户自定义的题目,如果是则取消选择相当于删除该题目
+        if($course->is_custom){
+            $course->delete();
+        }else{
+            $course->chooser = null;
+            $course->status = 0;
+            $course->user_id =null;
+            if(!$course->save()){
+                throw new StoreResourceFailedException('系统异常.');
+            }
+        }
+        $uInfo = User::find($user->id);
+        $uInfo->selected_course = null;
+        if(!$uInfo->save()){
+            throw new StoreResourceFailedException('系统异常.');
+        }
+        return $this->response()->array(['msg'=>'你已成功取消选择该课程设计']);
     }
 
     /**
@@ -108,7 +139,7 @@ class CourseController extends BaseApiController
             'status'=>0,
             'user_id'=>null,
             'chooser'=>null,
-            'custom'=>0,
+            'is_custom'=>0,
         ]);
         return $this->response->item($addCourse , new CourseListsTransformer());
     }

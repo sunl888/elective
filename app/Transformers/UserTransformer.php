@@ -31,7 +31,7 @@ class UserTransformer extends TransformerAbstract
             'class'=> $user->class,
             'selected_course'=> $user->selected_course,
             'introduce'=> $user->introduce,
-            'custom'=> $user->costom,//判断是不是自定义的课程设计
+            'is_custom'=> $user->is_costom,//判断是不是自定义的课程设计
             'course_id'=> $user->course_id,//用来修改课程设计内容
         ];
     }

@@ -17,11 +17,11 @@ class Course extends Model
     public $timestamps = false;
     /**
      * The attributes that are mass assignable.
-     *指定哪些属性可以被集体赋值
+     *指定哪些属性可以被集体赋值 [坑]
      * @var array
      */
     protected $fillable = [
-        'course_name', 'belong_class' , 'status' , 'introduce' , 'chooser'
+        'course_name', 'belong_class' , 'status' , 'introduce' , 'chooser' , 'is_custom' , 'user_id'
     ];
 
     /**
