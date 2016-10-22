@@ -37,6 +37,7 @@ class CourseListsTransformer extends TransformerAbstract
             'status' => $course->status,
             'introduce' => $course->introduce,
             'chooser' => $course->chooser,
+            'user_id' => $course->user_id,
             'is_custom'=> $course->is_custom,//判断是不是自定义的课程设计
         ];
     }

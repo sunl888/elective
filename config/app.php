@@ -168,19 +168,18 @@ return [
          */
 
         Dingo\Api\Provider\LaravelServiceProvider::class,
-        //Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Ty666\Login2hnnuJwc\Laravel\LaravelServiceProvider::class,
         Prettus\Repository\Providers\RepositoryServiceProvider::class,
         MetricLoop\TransformerMaker\TransformerMakerServiceProvider::class,
         Barryvdh\Cors\ServiceProvider::class,//跨域请求
-        Clockwork\Support\Laravel\ClockworkServiceProvider::class,
+        //Clockwork\Support\Laravel\ClockworkServiceProvider::class,
+
         /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 

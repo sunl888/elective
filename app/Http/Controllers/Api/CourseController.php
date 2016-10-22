@@ -31,13 +31,14 @@ class CourseController extends BaseApiController
         $user = JWTAuth::user();
 
         $course = Course::where(['user_id'=>$user->id])->first();
+
         if(is_null($course)){
             $user['introduce'] = '';
-            $user['is_costom'] = 0;
+            $user['is_custom'] = 0;
             $user['course_id'] = 0;
         }else{
             $user['course_id'] = $course->id;//可通过此id来修改课程设计内容
-            $user['is_costom'] = $course->costom;//表示该题目是不是自己添加的 默认:0
+            $user['is_custom'] = $course->is_custom;//表示该题目是不是自己添加的 默认:0
             $user['introduce'] = $course->introduce;//题目的详情
         }
         return $this->response->item($user , new UserTransformer());
@@ -59,14 +60,16 @@ class CourseController extends BaseApiController
     public function selectCourse($id)
     {
         $user = JWTAuth::user();
-        //判断该用户以前有没有选过课程设计
-        if($this->isChoosed() != null){
-            throw new StoreResourceFailedException('你已经选过课程设计.');
-        }
         //查找用户选择的题目信息
-        $course = Course::where(['id'=>$id , 'status'=>0])->first();
+        $course = Course::where(['id'=>$id ,'belong_class'=>$user->class, 'status'=>0])->first();
         if($course == null){
-            throw new StoreResourceFailedException('该题目已经被其他同学选择.');
+            //该题目不是本班的或者改题目被其他人选择.
+            throw new StoreResourceFailedException('该题目已经被其他同学选择,或者你已经选择了该课程设计');
+        }
+        //判断该用户以前有没有选过课程设计,如果以前选择了则先将以前选择的题目删除
+        if($this->isChoosed() != null){
+            //throw new StoreResourceFailedException('你已经选过课程设计.');
+            $this->cancelCourse($id);
         }
         $course->status = 1;
         $course->chooser = $user->name;
@@ -83,15 +86,16 @@ class CourseController extends BaseApiController
     /**
      * 取消选择
      */
-    public function cancelCourse($id){
+    private function cancelCourse($id){
         $user = JWTAuth::user();
-        if($this->isChoosed() == null){
+        /*if($this->isChoosed() == null){
             throw new StoreResourceFailedException('你还没有选课程设计呢.');
-        }
-        $course = Course::where(['id' => $id , 'user_id' => $user->id])->first();
+        }*/
+        //$course = Course::where(['id' => $id , 'user_id' => $user->id])->first();
+        $course = Course::where(['user_id' => $user->id])->first();
 
         if($course == null){
-            throw new StoreResourceFailedException('数据库里没有该课程.');
+            throw new StoreResourceFailedException('数据库里没有该课程或者你选择的不是该课程.');
         }
         //判断是不是用户自定义的题目,如果是则取消选择相当于删除该题目
         if($course->is_custom){
@@ -109,11 +113,12 @@ class CourseController extends BaseApiController
         if(!$uInfo->save()){
             throw new StoreResourceFailedException('系统异常.');
         }
-        return $this->response()->array(['msg'=>'你已成功取消选择该课程设计']);
+        //return $this->response()->array(['msg'=>'你已成功取消选择该课程设计']);
+        return true;
     }
 
     /**
-     * [班长]添加课程设计
+     * [班长]导入本班所有的课程设计题目
      */
     public function addCourse(Request $request){
         $validator = Validator::make($request->input() , $this->validationRoles , [

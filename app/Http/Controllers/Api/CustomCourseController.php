@@ -24,17 +24,26 @@ class CustomCourseController extends BaseApiController
      * 1.只有自己定义的题目才可以修改
      * return reource | array[] | exception
      */
-    public function upCourse(Request $request)
+    public function upCourse(Request $request , $id)
     {
         $custom = $request->input();
-        $validator = Validator::make($custom , $this->validationRoles);
+        $validator = Validator::make($custom , $this->validationRoles , [
+            'required'=>':attribute 必须要填写.',
+            'min'=>':attribute 长度不得小于3',
+        ],[
+            'course_name'=> '课程名',
+            'introduce'=> '课程简介',
+        ]);
         if($validator->fails()){
             throw new StoreResourceFailedException('数据验证失败!', $validator->errors());
         }
         $course = Course::where([
-            'id'=>$custom['course_id'],
+            'id'=>$id,
             'is_custom'=>1//判断此题是不是用户自定义的题目,只有自定义的题目才可以修改
         ])->first();
+        if($course == null){
+            throw new StoreResourceFailedException('这个题目不是你自定义的,不可以修改.');
+        }
         $course->course_name = $custom['course_name'];
         $course->introduce = $custom['introduce'];
         $user = JWTAuth::user();
@@ -53,19 +62,35 @@ class CustomCourseController extends BaseApiController
      * 2.自己添加的课程设计只有自己才可以修改使用is_custom来区分是不是自己定义
      */
     public function addCustomCourse(Request $request){
-        $course = $request->all();
-        $validator = Validator::make($request->input() , $this->validationRoles);
+        $validator = Validator::make($request->input() , $this->validationRoles , [
+            'required'=>':attribute 必须要填写.',
+            'min'=>':attribute 长度不得小于3',
+        ],[
+            'course_name'=> '课程名',
+            'introduce'=> '课程简介',
+        ]);
         if($validator->fails()){
             throw new StoreResourceFailedException('数据验证失败!', $validator->errors());
         }
+        //将用户之前选择的题目取消
         $user = JWTAuth::user();
-        if($user->selected_course){
-            throw new StoreResourceFailedException('你已经选择过课程设计,不可以再添加自定义课程.');
+        $course = Course::where(['user_id' => $user->id])->first();
+        if($course != null){
+            if($course->is_custom){
+                $course->delete();
+            }else{
+                $course->chooser = null;
+                $course->status = 0;
+                $course->user_id =null;
+                if(!$course->save()){
+                    throw new StoreResourceFailedException('自定义选题失败.');
+                }
+            }
         }
         //判断添加的课程设计是否存在
         $lists = Course::where([
             'belong_class'=> $user->class,
-            'course_name'=>$course['course_name'],
+            'course_name'=>$request['course_name'],
         ])->get();
         if(!$lists->isEmpty()){
             throw new \Dingo\Api\Exception\StoreResourceFailedException('该课程设计已经存在!');
