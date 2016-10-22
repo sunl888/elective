@@ -33,7 +33,13 @@ class AuthenticateController extends BaseApiController
         /**
          * 数据验证
          */
-        $validator = Validator::make($request->input() , $this->validationRules);
+        $validator = Validator::make($request->input() , $this->validationRules , [
+            'required'=>':attribute 必须要填写.',
+            'regex'=>'学号为10位,身份证为18位',
+        ],[
+            'number'=> '学号',
+            'password'=> '身份证',
+        ]);
         if($validator->fails()){
             throw new InvalidParameterException($validator->errors()->first());
         }
