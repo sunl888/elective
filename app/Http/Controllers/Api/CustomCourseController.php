@@ -9,6 +9,8 @@ use Dingo\Api\Exception\StoreResourceFailedException;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Validator;
+use Mockery\CountValidator\Exception;
+use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CustomCourseController extends BaseApiController
@@ -63,14 +65,14 @@ class CustomCourseController extends BaseApiController
      */
     public function addCustomCourse(Request $request){
         $validator = Validator::make($request->input() , $this->validationRoles , [
-            'required'=>':attribute 必须要填写.',
-            'min'=>':attribute 长度不得小于3',
+            'required'=>':attribute必须要填写.',
+            'min'=>':attribute长度不得小于3个字符',
         ],[
             'course_name'=> '课程名',
             'introduce'=> '课程简介',
         ]);
         if($validator->fails()){
-            throw new StoreResourceFailedException('数据验证失败!', $validator->errors());
+            throw new Exception('数据验证失败:'.$validator->errors()->first());
         }
         //将用户之前选择的题目取消
         $user = JWTAuth::user();

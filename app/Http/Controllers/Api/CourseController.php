@@ -118,38 +118,6 @@ class CourseController extends BaseApiController
     }
 
     /**
-     * [班长]导入本班所有的课程设计题目
-     */
-    public function addCourse(Request $request){
-        $validator = Validator::make($request->input() , $this->validationRoles , [
-            'required'=>':attribute 必须要填写.',
-            'min'=>':attribute 长度不得小于3',
-        ],[
-            'course_name'=> '课程名',
-            'introduce'=> '课程简介',
-        ]);
-        if($validator->fails()){
-            throw new StoreResourceFailedException('数据验证失败!', $validator->errors());
-        }
-        $user = JWTAuth::user();
-        //判断添加的课程设计是否存在
-        if($this->existedCourse($request->course_name)){
-            throw new \Dingo\Api\Exception\StoreResourceFailedException('该课程设计已经存在!');
-        }
-        $addCourse = Course::create([
-            'id'=>null,
-            'course_name'=> $request->course_name,
-            'belong_class'=> $user->class,
-            'introduce'=>$request->introduce,
-            'status'=>0,
-            'user_id'=>null,
-            'chooser'=>null,
-            'is_custom'=>0,
-        ]);
-        return $this->response->item($addCourse , new CourseListsTransformer());
-    }
-
-    /**
      * 判断用户有没有选择课程设计
      */
     private function isChoosed(){
