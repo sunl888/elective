@@ -46,10 +46,10 @@ class CourseController extends BaseApiController
     /**
      * 根据已登陆用户的班级列出该班所有的课程设计题目
      */
-    public function courseLists()
+    public function courseLists($offset = 0 , $limit = 100)
     {
         $user = JWTAuth::user();
-        $lists = Course::where('belong_class' , $user->class)->get();
+        $lists = Course::where('belong_class' , $user->class)->skip($offset)->take($limit)->get();
         return $this->response->collection($lists , new CourseListsTransformer());
     }
 

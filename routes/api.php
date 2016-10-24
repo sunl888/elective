@@ -36,7 +36,7 @@ $api->group(['middleware' => 'jwt.auth'], function ($api) {
     //1.添加课程设计 input: course_name , introduce
     $api->post('add_course', 'AdminController@addCourse');
     //2.显示课程设计列表
-    $api->get('list_course', 'CourseController@courseLists');
+    $api->get('list_course/{offset}/{limit}', 'CourseController@courseLists');
     //3.修改课程设计
     $api->post('update_course/{id}', 'AdminController@updateCourse');
     //4.删除课程设计
