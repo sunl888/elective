@@ -91,6 +91,12 @@ class AdminController extends BaseApiController
         if(!$course){
             throw new Exception('删除失败,没有找到该课程设计.');
         }
+        //如果有人选择了该课程设计,则同时删除该选择者的选择信息.
+        if($course->user_id != NULL){
+            $userInfo = User::where(['id' =>$course->user_id])->first();
+            $userInfo->selected_course = NULL;
+            $userInfo->save();
+        }
         $course->delete();
         return $this->response->array(['msg'=>'删除成功.']);
     }

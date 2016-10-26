@@ -52,6 +52,13 @@ class CourseController extends BaseApiController
         $lists = Course::where('belong_class' , $user->class)->skip($offset)->take($limit)->get();
         return $this->response->collection($lists , new CourseListsTransformer());
     }
+    public function countCourse()
+    {
+        $user = JWTAuth::user();
+        $count = Course::where('belong_class' , $user->class)->count();
+        return $this->response->array(['count'=>$count]);
+    }
+
 
     /**
      * 选择课程设计
