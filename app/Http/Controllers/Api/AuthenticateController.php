@@ -47,7 +47,7 @@ class AuthenticateController extends BaseApiController
         $login = User::where(['number'=>$input['number'],'password'=>$input['password']])->first();
         if(!$login) {
             //本地数据库不存在
-            if (!$token = JWTAuth::attempt($input)) {
+            if ( !($token = JWTAuth::attempt($input)) ) {
                 try {
                     Login2hnnuJwc::login2Jwc($input['number'], $input['password']);
                     $userInfo = Login2hnnuJwc::getStudentInfoFromJWC();

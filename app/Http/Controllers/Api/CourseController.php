@@ -29,9 +29,9 @@ class CourseController extends BaseApiController
     public function me()
     {
         $user = JWTAuth::user();
+        //$users = JWTAuth::parseToken()->authenticate();
 
         $course = Course::where(['user_id'=>$user->id])->first();
-
         if(is_null($course)){
             $user['introduce'] = '';
             $user['is_custom'] = 0;
