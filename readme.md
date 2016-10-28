@@ -2,7 +2,7 @@
 
 ----------
 
-###Laravel PHP Framework 
+###My first Laravel framework project
 
     为了帮助学校各班级更方便的选择课程设计题目,同时为了检验最近学的Laravel框架而做的一个课程设计选择系统.
     
